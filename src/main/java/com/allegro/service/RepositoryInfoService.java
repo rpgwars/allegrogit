@@ -5,5 +5,5 @@ import com.allegro.model.RepositoryInfo;
 import org.springframework.stereotype.Service;
 
 public interface RepositoryInfoService {
-    RepositoryInfo getRepositoryInfo(String owner, String repositoryName) throws NotFoundException;
+    RepositoryInfo getRepositoryInfo(String owner, String repositoryName) throws Exception;
 }
