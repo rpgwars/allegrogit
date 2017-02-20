@@ -17,6 +17,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -80,7 +83,7 @@ public class SimpleRepositoryInfoServiceTest {
         //when
         RepositoryInfo repositoryInfo = null;
         try {
-            repositoryInfo = simpleRepositoryInfoService.getRepositoryInfo("a", "b");
+            repositoryInfo = simpleRepositoryInfoService.getRepositoryInfo("a", "b", null);
         } catch (Exception e) {
             fail();
         }
@@ -99,7 +102,7 @@ public class SimpleRepositoryInfoServiceTest {
         given(statusLine.getStatusCode()).willReturn(404);
 
         //when
-        simpleRepositoryInfoService.getRepositoryInfo("a", "b");
+        simpleRepositoryInfoService.getRepositoryInfo("a", "b", null);
 
         //then
     }
@@ -110,7 +113,7 @@ public class SimpleRepositoryInfoServiceTest {
         given(statusLine.getStatusCode()).willReturn(402);
 
         //when
-        simpleRepositoryInfoService.getRepositoryInfo("a", "b");
+        simpleRepositoryInfoService.getRepositoryInfo("a", "b", null);
 
         //then
     }
@@ -124,8 +127,33 @@ public class SimpleRepositoryInfoServiceTest {
         given(objectMapper.readValue(inputStream, Map.class)).willThrow(IOException.class);
 
         //when
-        simpleRepositoryInfoService.getRepositoryInfo("a", "b");
+        simpleRepositoryInfoService.getRepositoryInfo("a", "b", null);
 
         //then
+    }
+
+    @Test
+    public void shouldReturnRepositoryInfoDateFormatted() throws IOException {
+        //given
+        given(statusLine.getStatusCode()).willReturn(200);
+        given(closeableHttpResponse.getEntity()).willReturn(httpEntity);
+        given(httpEntity.getContent()).willReturn(inputStream);
+        given(objectMapper.readValue(inputStream, Map.class)).willReturn(map);
+        given(map.get(CREATED_AT_PROPERTY)).willReturn("2017-02-16T07:37:22Z");
+        given(map.get(STARS_PROPERTY)).willReturn(5);
+        Locale plLocale = Locale.forLanguageTag("pl-PL");
+        //no static mocking
+        simpleRepositoryInfoService.setDateTimeFormatter(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL));
+
+        //when
+        RepositoryInfo repositoryInfo = null;
+        try {
+            repositoryInfo = simpleRepositoryInfoService.getRepositoryInfo("a", "b", plLocale);
+        } catch (Exception e) {
+            fail();
+        }
+
+        //then
+        assertThat(repositoryInfo.getCreatedAt(), equalTo("czwartek, 16 lutego 2017 07:37:22 Z"));
     }
 }

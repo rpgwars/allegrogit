@@ -13,8 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,15 +47,18 @@ public class SimpleRepositoryInfoService implements RepositoryInfoService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private DateTimeFormatter dateTimeFormatter;
+
     private final Logger logger = Logger.getLogger(SimpleRepositoryInfoService.class.getName());
 
     @Override
-    public RepositoryInfo getRepositoryInfo(String owner, String repositoryName) throws Exception {
+    public RepositoryInfo getRepositoryInfo(String owner, String repositoryName, Locale locale) throws Exception {
         HttpGet httpGet = new HttpGet(getUserRepositoryUrl(owner, repositoryName));
         try {
             CloseableHttpResponse response = defaultHttpClient.execute(httpGet);
             if(response.getStatusLine().getStatusCode() == OK.value()) {
-                return createResponse(parseResponse(response));
+                return createResponse(parseResponse(response), locale);
             }
             else if(response.getStatusLine().getStatusCode() == NOT_FOUND.value()){
                 logger.log(Level.INFO, "Repository " + repositoryName + " of user " + owner + " not found");
@@ -67,7 +74,7 @@ public class SimpleRepositoryInfoService implements RepositoryInfoService {
         }
     }
 
-    private RepositoryInfo createResponse(Map<String, Object> repositoryInfoJSONMap){
+    private RepositoryInfo createResponse(Map<String, Object> repositoryInfoJSONMap, Locale locale){
         REPOSITORY_PROPERTIES.stream()
                 .filter(property -> repositoryInfoJSONMap.get(property) == null)
                 .forEach(property -> logger.log(Level.WARNING, "property " + property + " not found"));
@@ -76,7 +83,15 @@ public class SimpleRepositoryInfoService implements RepositoryInfoService {
                 (String)repositoryInfoJSONMap.get(DESCRIPTION_PROPERTY),
                 (String)repositoryInfoJSONMap.get(CLONE_URL_PROPERTY),
                 (int)repositoryInfoJSONMap.get(STARS_PROPERTY),
-                (String)repositoryInfoJSONMap.get(CREATED_AT_PROPERTY));
+                formatCreatedAt((String)repositoryInfoJSONMap.get(CREATED_AT_PROPERTY), locale));
+    }
+
+    private String formatCreatedAt(String createdAt, Locale locale) {
+        if(locale == null)
+            return createdAt;
+        ZonedDateTime zonedDateTime = ZonedDateTime.parse(createdAt);
+        DateTimeFormatter formatter = dateTimeFormatter.withLocale(locale);
+        return zonedDateTime.format(formatter);
     }
 
     private Map<String, Object> parseResponse(CloseableHttpResponse response) throws IOException, ParseException {
@@ -93,5 +108,9 @@ public class SimpleRepositoryInfoService implements RepositoryInfoService {
 
     private String getUserRepositoryUrl(String owner, String repositoryName){
         return String.format(userRepositoryPath, GITHUB_API_ROOT, owner, repositoryName);
+    }
+
+    public void setDateTimeFormatter(DateTimeFormatter dateTimeFormatter) {
+        this.dateTimeFormatter = dateTimeFormatter;
     }
 }

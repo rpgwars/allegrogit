@@ -15,8 +15,7 @@ import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -38,10 +37,12 @@ public class RepositoryInfoControllerIT {
 
     @Test
     public void shouldGetRepoDetails() throws MalformedURLException {
-        URL url = new URL(base + "rpgwars/IOSR2013");
-        ResponseEntity<String> response = template.getForEntity(url.toString(), String.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept-Language", "pl-PL,pl;q=0.8,en-US;q=0.6,en;q=0.4");
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+        ResponseEntity<String> response = template.exchange(base + "rpgwars/IOSR2013", HttpMethod.GET, entity, String.class);
         assertThat(response.getBody(),
-                equalTo("{\"fullName\":\"rpgwars/IOSR2013\",\"description\":\"AGH IOSR project repository\",\"cloneUrl\":\"https://github.com/rpgwars/IOSR2013.git\",\"stars\":0,\"createdAt\":\"2013-03-09T08:59:32Z\"}"));
+                equalTo("{\"fullName\":\"rpgwars/IOSR2013\",\"description\":\"AGH IOSR project repository\",\"cloneUrl\":\"https://github.com/rpgwars/IOSR2013.git\",\"stars\":0,\"createdAt\":\"sobota, 9 marca 2013 08:59:32 Z\"}"));
     }
 
     @Test

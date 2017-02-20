@@ -9,6 +9,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+
 @SpringBootApplication
 @ComponentScan(basePackages = "com.allegro")
 public class Application {
@@ -25,6 +28,11 @@ public class Application {
     @Bean
     public CloseableHttpClient closeableHttpClient(ApplicationContext context){
         return HttpClients.createDefault();
+    }
+
+    @Bean
+    public DateTimeFormatter dateTimeFormatter(ApplicationContext context){
+        return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL);
     }
 
 }

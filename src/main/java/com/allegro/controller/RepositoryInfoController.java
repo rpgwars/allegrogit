@@ -8,20 +8,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.allegro.service.RepositoryInfoService;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Locale;
+
 @RestController
 public class RepositoryInfoController {
 
     @Autowired
     private RepositoryInfoService repositoryInfoService;
 
+    @Autowired(required=true)
+    private HttpServletRequest request;
+
     @RequestMapping("/repositories/{owner}/{repositoryName}")
     public @ResponseBody ResponseEntity<RepositoryInfo> getRepositoryInfo(@PathVariable String owner,
-                                                                          @PathVariable String repositoryName,
-                                                                          @RequestHeader(value="Date", required = false) String date) {
+                                                                          @PathVariable String repositoryName) {
         if(!validatePathVariableString(owner) || !validatePathVariableString(repositoryName))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         try {
-            return new ResponseEntity<>(repositoryInfoService.getRepositoryInfo(owner, repositoryName), HttpStatus.OK);
+            return new ResponseEntity<>(repositoryInfoService.getRepositoryInfo(owner, repositoryName, request.getLocale()),
+                    HttpStatus.OK);
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {

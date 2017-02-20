@@ -23,6 +23,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import javax.servlet.http.HttpServletRequest;
+
 @RunWith(SpringRunner.class)
 public class RepositoryInfoControllerTest {
 
@@ -32,13 +34,16 @@ public class RepositoryInfoControllerTest {
     @Mock
     private RepositoryInfoService repositoryInfoService;
 
+    @Mock
+    private HttpServletRequest httpServletRequest;
+
     @Test
     public void shouldReturnOK() throws Exception {
         //given
-        given(repositoryInfoService.getRepositoryInfo("some owner", "some name")).willReturn(mock(RepositoryInfo.class));
+        given(repositoryInfoService.getRepositoryInfo("some owner", "some name", null)).willReturn(mock(RepositoryInfo.class));
 
         //when
-        ResponseEntity<RepositoryInfo> responseEntity = repositoryInfoController.getRepositoryInfo("some owner", "some name", null);
+        ResponseEntity<RepositoryInfo> responseEntity = repositoryInfoController.getRepositoryInfo("some owner", "some name");
 
         //then
         assertThat(responseEntity.getStatusCodeValue(), equalTo(200));
@@ -47,10 +52,10 @@ public class RepositoryInfoControllerTest {
     @Test
     public void shouldReturnNotFound() throws Exception {
         //given
-        given(repositoryInfoService.getRepositoryInfo("some owner", "some name")).willThrow(NotFoundException.class);
+        given(repositoryInfoService.getRepositoryInfo("some owner", "some name", null)).willThrow(NotFoundException.class);
 
         //when
-        ResponseEntity<RepositoryInfo> responseEntity = repositoryInfoController.getRepositoryInfo("some owner", "some name", null);
+        ResponseEntity<RepositoryInfo> responseEntity = repositoryInfoController.getRepositoryInfo("some owner", "some name");
 
         //then
         assertThat(responseEntity.getStatusCodeValue(), equalTo(404));
@@ -59,10 +64,10 @@ public class RepositoryInfoControllerTest {
     @Test
     public void shouldReturnInternalServerError() throws Exception {
         //given
-        given(repositoryInfoService.getRepositoryInfo("some owner", "some name")).willThrow(Exception.class);
+        given(repositoryInfoService.getRepositoryInfo("some owner", "some name", null)).willThrow(Exception.class);
 
         //when
-        ResponseEntity<RepositoryInfo> responseEntity = repositoryInfoController.getRepositoryInfo("some owner", "some name", null);
+        ResponseEntity<RepositoryInfo> responseEntity = repositoryInfoController.getRepositoryInfo("some owner", "some name");
 
         //then
         assertThat(responseEntity.getStatusCodeValue(), equalTo(500));
