@@ -1,14 +1,15 @@
 package com.allegro.model;
-import java.time.LocalDateTime;
+
+import java.time.ZonedDateTime;
 
 public class RepositoryInfo {
     private final String fullName;
     private final String description;
     private final String cloneUrl;
     private final int stars;
-    private final LocalDateTime createdAt;
+    private final String createdAt;
 
-    public RepositoryInfo(String fullName, String description, String cloneUrl, int stars, LocalDateTime createdAt) {
+    public RepositoryInfo(String fullName, String description, String cloneUrl, int stars, String createdAt) {
         this.fullName = fullName;
         this.description = description;
         this.cloneUrl = cloneUrl;
@@ -32,7 +33,7 @@ public class RepositoryInfo {
         return stars;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 }
